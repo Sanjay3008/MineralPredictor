@@ -5,8 +5,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -15,10 +18,13 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -29,6 +35,8 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 
 public class upload_activity extends AppCompatActivity {
+
+    Report_Receiver broadcast = new Report_Receiver(this);
 
     ImageView sample_photo;
     Button upload, capture;
@@ -44,6 +52,7 @@ public class upload_activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_activity);
+
 
         progressBar = findViewById(R.id.progressbar);
         storageReference = FirebaseStorage.getInstance().getReference();
@@ -146,5 +155,46 @@ public class upload_activity extends AppCompatActivity {
             sample_photo.setImageBitmap(image);
 
         }
+    }
+    Snackbar snackbar;
+    boolean first =false;
+    public  void alert(boolean noconnectivity){
+        if(noconnectivity){
+            ScrollView dl = findViewById(R.id.upload_scroll);
+            snackbar= Snackbar
+                    .make(dl,"Check Your Internet....",Snackbar.LENGTH_LONG);
+            snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
+            snackbar.show();
+            Toast.makeText(getApplicationContext(),"Enable Internet! App cannot function since it requires Internet service",Toast.LENGTH_SHORT).show();
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            first=true;
+        }
+        else{
+            onResume();
+            ScrollView dl = findViewById(R.id.upload_scroll);
+            if(first){
+                snackbar= Snackbar
+                        .make(dl,"Internet Connected Back!!!",Snackbar.LENGTH_SHORT);
+                snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
+                snackbar.setBackgroundTint(Color.parseColor("#FF4E5E30"));
+                snackbar.show();
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                Toast.makeText(getApplicationContext(),"App Service Enabled",Toast.LENGTH_SHORT).show();
+
+            }
+            first=false;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        registerReceiver(broadcast,new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(broadcast);
     }
 }

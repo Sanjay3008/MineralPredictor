@@ -4,10 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +24,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +36,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     CardView c1, c2, c3, c14;
+    Report_Receiver broadcast = new Report_Receiver(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,4 +70,45 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    Snackbar snackbar;
+    boolean first =false;
+    public  void alert(boolean noconnectivity){
+        if(noconnectivity){
+            ScrollView dl = findViewById(R.id.main_scroll);
+            snackbar= Snackbar
+                    .make(dl,"Check Your Internet....",Snackbar.LENGTH_LONG);
+            snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
+            snackbar.show();
+            Toast.makeText(getApplicationContext(),"Enable Internet! App cannot function since it requires Internet service",Toast.LENGTH_SHORT).show();
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            first=true;
+        }
+        else{
+
+            ScrollView dl = findViewById(R.id.main_scroll);
+            if(first){
+                snackbar= Snackbar
+                        .make(dl,"Internet Connected Back!!!",Snackbar.LENGTH_SHORT);
+                snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
+                snackbar.setBackgroundTint(Color.parseColor("#FF4E5E30"));
+                snackbar.show();
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                Toast.makeText(getApplicationContext(),"App Service Enabled",Toast.LENGTH_SHORT).show();
+            }
+            first=false;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        registerReceiver(broadcast,new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(broadcast);
+    }
+
 }

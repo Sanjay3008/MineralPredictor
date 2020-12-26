@@ -2,12 +2,19 @@ package com.example.servertst;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 public class splash extends AppCompatActivity {
 
@@ -28,9 +35,24 @@ public class splash extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent i = new Intent(splash.this, MainActivity.class);
-                startActivity(i);
-                finish();
+                if(online())
+                {
+                    gomain();
+                }
+                else
+                {
+                    LinearLayout l = findViewById(R.id.linear_splash);
+                    Snackbar snackbar = Snackbar
+                            .make(l,"Check your Internet Connection!!!", Snackbar.LENGTH_INDEFINITE)
+                            .setAction("Retry", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    recreate();
+                                }
+                            });
+                    snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE);
+                    snackbar.show();
+                }
             }
         }, 5500);
 
@@ -42,4 +64,20 @@ public class splash extends AppCompatActivity {
         i4.startAnimation(animation);
 
     }
+
+    private boolean online() {
+        ConnectivityManager connectivityManager =(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return connectivityManager.getActiveNetworkInfo()!=null && connectivityManager.getActiveNetworkInfo().isConnectedOrConnecting();
+    }
+
+    public void gomain(){
+
+
+            Intent intent = new Intent(this,MainActivity.class);
+            startActivity(intent);
+            finish();
+
+    }
+
 }

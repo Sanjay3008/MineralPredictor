@@ -78,10 +78,10 @@ public class upload_activity extends AppCompatActivity {
             public void onClick(View view) {
                 if (image_choosen == 1) {
                     progressBar.setVisibility(View.VISIBLE);
-                    final String sample = sample_name.getText().toString();
-                    final String min_name = mineral_name.getText().toString();
-                    final String location = sample_location.getText().toString();
-                    final String ac_imp = acoustic.getText().toString();
+                    final String sample = sample_name.getText().toString().toUpperCase();
+                    final String min_name = mineral_name.getText().toString().toUpperCase();
+                    final String location = sample_location.getText().toString().toUpperCase();
+                    final String ac_imp = acoustic.getText().toString().toUpperCase();
 
 
                     if (!sample.isEmpty() && !min_name.isEmpty() && !location.isEmpty() && !ac_imp.isEmpty()) {
@@ -163,7 +163,7 @@ public class upload_activity extends AppCompatActivity {
             ScrollView dl = findViewById(R.id.upload_scroll);
             snackbar= Snackbar
                     .make(dl,"Check Your Internet....",Snackbar.LENGTH_LONG);
-            snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
+            snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE);
             snackbar.show();
             Toast.makeText(getApplicationContext(),"Enable Internet! App cannot function since it requires Internet service",Toast.LENGTH_SHORT).show();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

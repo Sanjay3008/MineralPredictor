@@ -1,11 +1,14 @@
 package com.example.servertst;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -18,6 +21,8 @@ public class sample_adapter extends RecyclerView.Adapter<sample_adapter.samplevi
 
     private Context context;
     private List<upload_data> upload_dataList;
+    private OnItemClickListener mlistener;
+    private AlertDialog dialog;
 
     public sample_adapter(Context context, List<upload_data> upload_dataList)
     {
@@ -53,10 +58,10 @@ public class sample_adapter extends RecyclerView.Adapter<sample_adapter.samplevi
         return upload_dataList.size();
     }
 
-    public class sampleviewholder extends RecyclerView.ViewHolder{
+    public class sampleviewholder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public TextView t1,t2,t3,t4;
-        public ImageView imageView;
+        public ImageView imageView,delete;
 
         public sampleviewholder(@NonNull View itemView) {
             super(itemView);
@@ -66,6 +71,53 @@ public class sample_adapter extends RecyclerView.Adapter<sample_adapter.samplevi
             t3=itemView.findViewById(R.id.sample_acoustic);
             t4=itemView.findViewById(R.id.sample_mineral);
             imageView = itemView.findViewById(R.id.sample_image);
+            delete = itemView.findViewById(R.id.delete_data);
+
+            delete.setOnClickListener(this);
+
+
+        }
+
+
+        @Override
+        public void onClick(View view) {
+            if(mlistener!=null)
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setMessage("Confirm to delete this sample?")
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                int pos = getAdapterPosition();
+                                if(pos!=RecyclerView.NO_POSITION)
+                                {
+                                    mlistener.onItemDelete(pos);
+                                }
+                            }
+                        })
+                        .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Toast.makeText(context,"Item Not Deleted",Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                dialog = builder.create();
+                dialog.show();
+
+
+            }
         }
     }
+    public interface OnItemClickListener {
+        void onItemDelete(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener)
+    {
+        mlistener = listener;
+
+    }
+
+
 }

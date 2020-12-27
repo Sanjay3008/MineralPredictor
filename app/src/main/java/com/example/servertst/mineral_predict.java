@@ -97,9 +97,9 @@ public class mineral_predict extends AppCompatActivity {
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        progress.setVisibility(View.VISIBLE);
-                        progressBar.setVisibility(View.VISIBLE);
-                        Toast.makeText(getApplicationContext(), error.getMessage() + "secod post", Toast.LENGTH_SHORT).show();
+                        progress.setVisibility(View.INVISIBLE);
+                        progressBar.setVisibility(View.INVISIBLE);
+                        Toast.makeText(getApplicationContext(), "Please Try again", Toast.LENGTH_SHORT).show();
                     }
                 });
                 requestQueue.add(request1);

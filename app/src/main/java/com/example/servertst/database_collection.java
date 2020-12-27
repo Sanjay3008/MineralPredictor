@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
@@ -23,17 +24,21 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class database_collection extends AppCompatActivity {
+public class database_collection extends AppCompatActivity implements sample_adapter.OnItemClickListener {
 
     Report_Receiver broadcast = new Report_Receiver(this);
 
     private RecyclerView recyclerView;
     private sample_adapter adapter;
+    private FirebaseStorage firebaseStorage;
     private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
     private ProgressBar progressBar;
 
     private List<upload_data> uploads;
@@ -48,19 +53,24 @@ public class database_collection extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         uploads = new ArrayList<>();
+        adapter = new sample_adapter(database_collection.this,uploads);
+        recyclerView.setAdapter(adapter);
+        adapter.setOnItemClickListener(database_collection.this);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("samples");
+        firebaseStorage = FirebaseStorage.getInstance();
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        valueEventListener= databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                uploads.clear();
                 for(DataSnapshot postsnapshoit: snapshot.getChildren()){
                     upload_data upload_data_item = postsnapshoit.getValue(upload_data.class);
+                    upload_data_item.setKey(postsnapshoit.getKey());
                     uploads.add(upload_data_item);
                 }
 
-                adapter = new sample_adapter(database_collection.this,uploads);
-                recyclerView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
                 progressBar.setVisibility(View.INVISIBLE);
             }
 
@@ -112,4 +122,25 @@ public class database_collection extends AppCompatActivity {
         unregisterReceiver(broadcast);
     }
 
+    @Override
+    public void onItemDelete(int position) {
+        upload_data select_item = uploads.get(position);
+        final String key = select_item.getKey();
+
+        StorageReference imageref = firebaseStorage.getReferenceFromUrl(select_item.getImageurl());
+        imageref.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                databaseReference.child(key).removeValue();
+                Toast.makeText(database_collection.this, "Item Deleted Successfully from Database", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        databaseReference.removeEventListener(valueEventListener);
+    }
 }

@@ -1,5 +1,7 @@
 package com.example.servertst;
 
+import com.google.firebase.database.Exclude;
+
 public class upload_data {
 
     private String sample_name;
@@ -7,6 +9,7 @@ public class upload_data {
     private String Acoustic_value;
     private String Mineral;
     private String imageurl;
+    private String key;
 
     public String getSample_name() {
         return sample_name;
@@ -48,6 +51,17 @@ public class upload_data {
         this.imageurl = imageurl;
     }
 
+
+    @Exclude
+    public void setKey(String key)
+    {
+        this.key = key;
+    }
+    @Exclude
+    public String getKey()
+    {
+        return key;
+    }
 
 
     public upload_data() {
